@@ -140,9 +140,59 @@ SELECT CategoryName,
 FROM Categories as c
 ORDER BY Toplam DESC
 
+--En pahalı ürünüm hangisi?
+SELECT ProductName, UnitPrice, UnitsInStock
+FROM Products
+WHERE UnitPrice =( SELECT MAX(UnitPrice) FROM Products )
+
+SELECT TOP 1
+ProductName, UnitPrice, UnitsInStock
+FROM Products
+ORDER BY UnitPrice DESC
+
+-- 
+-- En çok para aldığımız sipariş hangisi?
+SELECT O.OrderID, CompanyName
+FROM [Order Details] od
+JOIN Orders o
+ON o.OrderID = od.OrderID
+JOIN Customers C
+on O.CustomerID = C.CustomerID
+WHERE  od.UnitPrice * od.Quantity =
+(SELECT 
+    MAX(UnitPrice * Quantity) 
+FROM [Order Details])
 
 
+CREATE PROC searchProduct
+  @name nvarchar(10)
+AS
+SELECT *
+FROM Products WHERE ProductName LIKE '%'+@name+'%'
 
+
+searchProduct 'Anton'
+-- Bir ürünü satın alan müşteri, yanında bunları aldı:
+-- Sadece X (1) ürününü alan fişlerin içinden; DİĞER ürünleri saymam gerek.
+
+CREATE PROC recommendedProducts 
+  @productId int
+AS
+SELECT TOP 5
+   ProductName, SUM(Quantity) as TotalQuantity
+FROM 
+[Order Details] JOIN Products p
+ON [Order Details].ProductID = p.ProductID
+WHERE OrderID IN
+( 
+   SELECT  OrderID 
+   FROM [Order Details]  WHERE ProductID =@productId
+)
+AND [Order Details].ProductId != @productId
+GROUP BY ProductName
+ORDER BY TotalQuantity DESC
+
+recommendedProducts 25
 
 
 
