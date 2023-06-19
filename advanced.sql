@@ -82,3 +82,70 @@ ON p.CategoryID = ca.CategoryID
 JOIN Suppliers sp
 ON sp.SupplierID = p.SupplierID
 
+
+SELECT * FROM Categories
+INSERT into Categories (CategoryName) values ('Unlu Mamüller')
+
+INSERT into Products (ProductName,UnitPrice) values ('Simit',7.5)
+
+-- INNER JOIN : Kesişim
+-- LEFT JOIN: Join kelimesinin solundaki Tablonun tamamı...
+-- RIGHT    : Join kelimesinin sağındaki...................
+-- FULL JOIN: Her iki tablonun da tüm satırları
+SELECT 
+    ProductName,CategoryName
+FROM Categories FULL JOIN Products
+ON Categories.CategoryID = Products.CategoryID
+WHERE CategoryName is NULL OR 
+      ProductName is NULL
+
+
+SELECT COUNt(*) FROM Customers
+SELECT COUNT(DISTINCT CustomerID) FROM Orders
+
+--Sipariş vermeyen müşterilerim kimler.
+SELECT
+    CompanyName,OrderID
+FROM Customers LEFT JOIN Orders
+ON Customers.CustomerID = Orders.CustomerID
+WHERE OrderID is NULL
+
+-- Çalışanlar ve Müdürleri
+SELECT 
+   Calisan.FirstName+ ' ' + Calisan.LastName 'Çalışan',
+   Mudur.FirstName + ' ' + Mudur.LastName 'Müdür'
+FROM  Employees as Calisan LEFT JOIN Employees as Mudur
+ON Calisan.ReportsTo = Mudur.EmployeeID
+
+SELECT Count(*) FROM Orders
+SELECT COUNt(*) FROM [Order Details]
+
+SELECT * FROM Orders CROSS JOIN [Order Details]
+
+--SUB-QUERY:
+-- Hangi kategoride kaç ürün var?
+SELECT
+   CategoryName, COUNT(ProductID) as 'Toplam'
+FROM Categories LEFT JOIN Products
+ON Categories.CategoryID = Products.CategoryID
+GROUP BY CategoryName
+ORDER BY Toplam DESC
+
+-- Aynı sorgunun sub-query karşılığı:
+SELECT CategoryName,
+     (
+	    SELECT COUNT(*)
+        FROM Products WHERE CategoryID = c.CategoryID
+	 ) AS 'Toplam'
+FROM Categories as c
+ORDER BY Toplam DESC
+
+
+
+
+
+
+
+
+
+
