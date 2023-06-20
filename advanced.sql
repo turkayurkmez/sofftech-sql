@@ -193,9 +193,55 @@ GROUP BY ProductName
 ORDER BY TotalQuantity DESC
 
 recommendedProducts 25
+ 
 
+GO
 
+CREATE PROC CreateNewOrder
+ @customer nchar(5),
+ @employee int
+AS  
+INSERT into Orders (CustomerID,EmployeeID,OrderDate)
+            values (@customer, @employee, GETDATE())            
 
+RETURN Scope_Identity()
 
+--Deniyoruz:
+DECLARE @lastOrderId int;
+EXECUTE @lastOrderId = CreateNewOrder 'ALFKI',4
 
+SELECT @lastOrderId
+SELECT * FROM Orders WHERE OrderID=12078
 
+--A1. Sadece 1 ürün alan ve yeni sipariş veren business:
+
+CREATE PROC CreateNewOrderWithOneProduct
+   @customer nchar(5),
+   @employee int,
+   @product int,
+   @price money,
+   @qty smallint,
+   @disc real
+AS
+DECLARE @paramlastOrderId int;
+--1. prosedürü çalıştır:
+EXECUTE @paramlastOrderId = CreateNewOrder @customer,@employee
+INSERT into [Order Details] (OrderID, ProductID, UnitPrice,Quantity, Discount)
+                    values  (@paramlastOrderId, @product,@price,@qty,@disc)
+
+--1 ürün alan müşteri:
+EXEC CreateNewOrderWithOneProduct 'ANTON',6,14,25,1,0
+
+SELECT * FROM Orders order by OrderID desc
+SELECT * FROM [Order Details] WHERE OrderID = 12079
+
+--alternatif: aynı siparişte çok ürün alan müşteri ise,
+ CREATE PROC CreateOrderDetail
+    @order int,
+	@product int,
+	@price money,
+	@qty smallint,
+	@disc real
+AS
+   INSERT into [Order Details] (OrderID, ProductID, UnitPrice,Quantity, Discount)
+                       values  (@order, @product,@price,@qty,@disc)
